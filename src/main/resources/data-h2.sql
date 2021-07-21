@@ -1,0 +1,3 @@
+INSERT INTO PROPERTIES (APPLICATION, PROFILE, LABEL, PROP_KEY, PROP_VALUE) VALUES ('app-client', 'dev', 'master', 'threadpool.min.size','10');
+INSERT INTO PROPERTIES (APPLICATION, PROFILE, LABEL, PROP_KEY, PROP_VALUE) VALUES ('app-client', 'dev', 'master', 'threadpool.size','50');
+INSERT INTO PROPERTIES (APPLICATION, PROFILE, LABEL, PROP_KEY, PROP_VALUE) VALUES ('app-client', 'dev', 'master', 'app.scheduler.timeout','9000');

@@ -1,0 +1,10 @@
+app:
+  scheduler:
+    timeout: 9999
+threadpool:
+  core:
+    size: 25
+  queue:
+    size: 100
+  max:
+    size: 100

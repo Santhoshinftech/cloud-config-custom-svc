@@ -1,0 +1,4 @@
+create table PROPERTIES
+(ID BIGINT auto_increment PRIMARY KEY,
+CREATED_ON TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+APPLICATION varchar(8191), PROFILE varchar(8191), LABEL varchar(8191), PROP_KEY varchar(8191), PROP_VALUE varchar(32767), primary key (ID));
