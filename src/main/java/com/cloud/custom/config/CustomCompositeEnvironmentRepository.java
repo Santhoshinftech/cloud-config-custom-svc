@@ -10,7 +10,7 @@ import org.springframework.core.OrderComparator;
 import java.util.Collections;
 import java.util.List;
 
-public class CustomCompositeEnvironmentRepository implements EnvironmentRepository {
+public class CustomCompositeEnvironmentRepository extends CompositeEnvironmentRepository {
 
     Log log = LogFactory.getLog(getClass());
 
@@ -19,21 +19,18 @@ public class CustomCompositeEnvironmentRepository implements EnvironmentReposito
     private boolean failOnError;
 
     /**
-     * Creates a new {@link CompositeEnvironmentRepository}.
+     * Creates a new {@link CustomCompositeEnvironmentRepository}.
      * @param environmentRepositories The list of {@link EnvironmentRepository}s to create
      * the composite from.
      * @param failOnError whether to throw an exception if there is an error.
      */
     public CustomCompositeEnvironmentRepository(List<EnvironmentRepository> environmentRepositories, boolean failOnError) {
-        // Sort the environment repositories by the priority
-        Collections.sort(environmentRepositories, OrderComparator.INSTANCE);
-        this.environmentRepositories = environmentRepositories;
-        this.failOnError = failOnError;
+        super(environmentRepositories, failOnError);
     }
 
     @Override
     public Environment findOne(String application, String profile, String label) {
-        return findOne(application, profile, label, false);
+        return super.findOne(application, profile, label, false);
     }
 
     @Override
