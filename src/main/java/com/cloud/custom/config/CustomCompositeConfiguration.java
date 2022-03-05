@@ -18,27 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-@AutoConfigureBefore(EnvironmentRepositoryConfiguration.class)
 public class CustomCompositeConfiguration {
-
-    private List<EnvironmentRepository> environmentRepos = new ArrayList<>();
-
-    private ConfigServerProperties properties;
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean(SearchPathLocator.class)
-    public CompositeEnvironmentRepository customCompositeEnvironmentRepository() {
-        return new CustomCompositeEnvironmentRepository(this.environmentRepos, properties.isFailOnCompositeError());
-    }
-
-    @Autowired
-    public void setEnvironmentRepos(List<EnvironmentRepository> repos) {
-        this.environmentRepos = repos;
-    }
-
-    @Autowired
-    public void setProperties(ConfigServerProperties properties) {
-        this.properties = properties;
+    public CompositeEnvironmentRepository customCompositeEnvironmentRepository(
+            List<EnvironmentRepository> environmentRepositories, ConfigServerProperties properties) {
+        return new CustomCompositeEnvironmentRepository(environmentRepositories, properties.isFailOnCompositeError());
     }
 }
