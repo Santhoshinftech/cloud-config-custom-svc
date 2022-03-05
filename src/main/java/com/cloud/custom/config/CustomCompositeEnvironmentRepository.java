@@ -3,14 +3,17 @@ package com.cloud.custom.config;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cloud.config.environment.Environment;
-import org.springframework.cloud.config.server.environment.CompositeEnvironmentRepository;
+import org.springframework.cloud.config.environment.PropertySource;
 import org.springframework.cloud.config.server.environment.EnvironmentRepository;
-import org.springframework.core.OrderComparator;
+import org.springframework.cloud.config.server.environment.SearchPathCompositeEnvironmentRepository;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-public class CustomCompositeEnvironmentRepository extends CompositeEnvironmentRepository {
+public class CustomCompositeEnvironmentRepository extends SearchPathCompositeEnvironmentRepository {
 
     Log log = LogFactory.getLog(getClass());
 
@@ -30,34 +33,32 @@ public class CustomCompositeEnvironmentRepository extends CompositeEnvironmentRe
 
     @Override
     public Environment findOne(String application, String profile, String label) {
-        return super.findOne(application, profile, label, false);
+        Environment env = super.findOne(application, profile, label, false);
+        return mergePropertySource(env);
     }
 
     @Override
     public Environment findOne(String application, String profile, String label, boolean includeOrigin) {
-        Environment env = new Environment(application, new String[] { profile }, label, null, null);
-        if (this.environmentRepositories.size() == 1) {
-            Environment envRepo = this.environmentRepositories.get(0).findOne(application, profile, label,
-                    includeOrigin);
-            env.addAll(envRepo.getPropertySources());
-            env.setVersion(envRepo.getVersion());
-            env.setState(envRepo.getState());
-        }
-        else {
-            for (EnvironmentRepository repo : environmentRepositories) {
-                try {
-                    env.addAll(repo.findOne(application, profile, label, includeOrigin).getPropertySources());
+        Environment env = super.findOne(application, profile, label, includeOrigin);
+        return mergePropertySource(env);
+    }
+
+    private Environment mergePropertySource(Environment environment) {
+        if(null != environment.getPropertySources() && !environment.getPropertySources().isEmpty()){
+            List<PropertySource> propertySources = environment.getPropertySources();
+            Collections.reverse(propertySources);
+            Map<String, String> sourceMap = new LinkedHashMap<>();
+            propertySources.forEach(propSource -> {
+                if(null != propSource.getSource() && !propSource.getSource().isEmpty()){
+                    propSource.getSource().forEach((propName, propVal) -> sourceMap.put(String.valueOf(propName), String.valueOf(propVal)));
                 }
-                catch (Exception e) {
-                    if (failOnError) {
-                        throw e;
-                    }
-                    else {
-                        log.info("Error adding environment for " + repo);
-                    }
-                }
-            }
+            });
+            String name = StringUtils.hasText(environment.getName()) ? environment.getName() : "";
+            String profile = StringUtils.hasText(String.join(",", environment.getProfiles())) ? String.join(",", environment.getProfiles()) : "";
+            var propertySource = new PropertySource(name +"-"+profile, sourceMap);
+            environment.getPropertySources().clear();
+            environment.getPropertySources().add(propertySource);
         }
-        return env;
+        return environment;
     }
 }
